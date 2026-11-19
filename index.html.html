@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>QuietHours – Smart Scheduling and Usage Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f1f8fb;--card:#fff;--ink:#0d2b40;--mut:#5c7487;--line:#e0ebf1;--blue:#1d6fd8;--teal:#0fb5a8;--g:#16a34a;--y:#eab308;--r:#dc2626;--sh:0 6px 24px rgba(20,80,120,.08)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0a1722;--card:#10222f;--ink:#e6f2f8;--mut:#8fa9ba;--line:#1d3446;--sh:0 6px 24px rgba(0,0,0,.35)}}
+:root[data-theme=dark]{--bg:#0a1722;--card:#10222f;--ink:#e6f2f8;--mut:#8fa9ba;--line:#1d3446;--sh:0 6px 24px rgba(0,0,0,.35)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 'Plus Jakarta Sans',system-ui,-apple-system,Segoe UI,sans-serif}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:linear-gradient(100deg,#0b4fa8,#0fb5a8);color:#fff;display:flex;align-items:center;gap:16px;padding:10px 20px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:18px;white-space:nowrap}nav{display:flex;gap:4px;overflow-x:auto;flex:1}
+nav a{color:#fff;text-decoration:none;padding:7px 13px;border-radius:99px;font-weight:600;font-size:13.5px;white-space:nowrap;opacity:.85;transition:.2s}
+nav a:hover,nav a.on{background:rgba(255,255,255,.22);opacity:1}
+.who{font-size:13px;display:flex;gap:10px;align-items:center}
+main{max-width:1180px;margin:0 auto;padding:22px 16px 60px;animation:in .35s}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+h1{font-size:26px;margin:0 0 4px;font-weight:800}h2{font-size:17px;margin:0 0 12px}.sub{color:var(--mut);margin:0 0 20px}
+.grid{display:grid;gap:16px}.g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.card{background:var(--card);border-radius:18px;padding:18px;box-shadow:var(--sh);border:1px solid var(--line);transition:.2s;min-width:0}
+.stat:hover{transform:translateY(-3px)}.stat b{font-size:28px;display:block;font-weight:800}.stat span{color:var(--mut);font-size:13px}
+.pill{display:inline-block;padding:3px 11px;border-radius:99px;color:#fff;font-weight:700;font-size:12px}
+button,.btn{background:linear-gradient(100deg,var(--blue),var(--teal));color:#fff;border:0;padding:9px 16px;border-radius:12px;font:600 14px inherit;font-family:inherit;cursor:pointer;transition:.2s}
+button:hover{filter:brightness(1.08);transform:translateY(-1px)}button.sec{background:var(--line);color:var(--ink)}button.del{background:var(--r)}button.sm{padding:5px 10px;font-size:12px}
+input,select{font:inherit;padding:9px 11px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--ink);min-width:0}
+label{font-size:12px;font-weight:700;color:var(--mut);display:flex;flex-direction:column;gap:4px}
+.bar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
+.wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--mut);font-size:12px}
+.cv{position:relative;height:280px}.strip{display:flex;gap:3px}.strip div{flex:1;min-width:16px;height:46px;border-radius:7px;font-size:10px;color:#fff;display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px}
+.heat{display:grid;grid-template-columns:36px repeat(17,minmax(22px,1fr));gap:2px;font-size:10px;min-width:480px}.heat div{height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#fff}
+.rec{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}.meter{height:8px;border-radius:9px;background:var(--line);margin:8px 0;overflow:hidden}.meter i{display:block;height:100%}
+.chip{display:inline-block;background:var(--line);border-radius:8px;padding:2px 8px;margin:2px;font-size:12px}
+#auth{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#0b4fa8,#0fb5a8)}#auth .card{width:min(400px,100%)}#auth form{display:grid;gap:12px}
+#toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#0d2b40;color:#fff;padding:10px 18px;border-radius:12px;opacity:0;transition:.3s;pointer-events:none;z-index:9}#toast.on{opacity:1}
+@media(max-width:600px){.g2{grid-template-columns:1fr}h1{font-size:22px}}
+</style></head><body>
+<div id="app"></div><div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),mem={};
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return mem[k]??null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){mem[k]=v}},del(k){try{localStorage.removeItem(k)}catch(e){delete mem[k]}}};
+const pad=n=>String(n).padStart(2,'0'),iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,fh=h=>pad(h)+':00';
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],H0=6,HRS=Array.from({length:17},(_,i)=>i+6),dow=s=>new Date(s+'T00:00').getDay();
+const hs=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return h.toString(36)};
+let db;try{db=JSON.parse(store.get('sl_db'))}catch(e){}
+const save=()=>store.set('sl_db',JSON.stringify(db));
+function seed(){
+ let a=42;const rnd=()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+ const wd=[1,4,5,3,2,1.5,1.5,1.5,1.5,1,1.5,2,3.5,5,5,3,1.5],we=[.5,1,2,3,4.5,5,5,4.5,4,3,2.5,2,2.5,3,3,2,1];
+ db={machines:[1,2,3,4,5,6].map(i=>({id:'M'+i,name:'Machine '+i,status:'available'})),records:[],blocked:[],bookings:[],
+ users:[{name:'Administrator',email:'admin@smartlaundry.com',pw:hs('admin123'),role:'admin'},{name:'Demo Resident',email:'demo@smartlaundry.com',pw:hs('demo123'),role:'resident'}]};
+ for(let i=28;i>=1;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=iso(d),p=[0,6].includes(d.getDay())?we:wd;
+  HRS.forEach((h,k)=>{const n=Math.max(0,Math.min(6,Math.round(p[k]+(rnd()-.5)*2)));db.machines.map(m=>m.id).sort(()=>rnd()-.5).slice(0,n).forEach(m=>db.records.push({d:ds,h,m}))})}
+ const t=new Date();t.setDate(t.getDate()+1);[[8,'M1'],[8,'M2'],[19,'M1'],[19,'M3']].forEach(([h,m],i)=>db.bookings.push({id:i+1,u:'demo@smartlaundry.com',d:iso(t),h,m,s:'confirmed',c:iso(new Date())}));
+ save()}
+if(!db||!db.machines)seed();
+const me=()=>db.users.find(u=>u.email===store.get('sl_me'));
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2600)}
+const charts={};function ch(id,cfg){charts[id]?.destroy();cfg.options=Object.assign({maintainAspectRatio:false,responsive:true},cfg.options||{});charts[id]=new Chart($('#'+id),cfg)}
+
+/* ---------- analytics engine ---------- */
+function slotStats(f){
+ const inR=r=>(!f.from||r.d>=f.from)&&(!f.to||r.d<=f.to)&&(f.dow==='all'||dow(r.d)==f.dow);
+ const base=db.records.filter(inR),dates=[...new Set(base.map(r=>r.d))].sort(),nd=Array(7).fill(0);dates.forEach(d=>nd[dow(d)]++);
+ const recs=base.filter(r=>f.m==='all'||r.m===f.m),cnt={};recs.forEach(r=>{const k=r.d+'|'+r.h;cnt[k]=(cnt[k]||0)+1});
+ const grid=Array.from({length:7},()=>HRS.map(()=>({sum:0,max:0})));
+ for(const k in cnt){const[d,h]=k.split('|'),g=grid[dow(d)][h-H0];g.sum+=cnt[k];g.max=Math.max(g.max,cnt[k])}
+ grid.forEach((row,i)=>row.forEach(g=>g.avg=nd[i]?g.sum/nd[i]:0));return{recs,dates,nd,grid}}
+/* K-Means (k-means++ init, 8 restarts, z-score scaling) */
+const d2=(a,b)=>(a[0]-b[0])**2+(a[1]-b[1])**2;
+function km(X,k,seed){let a=seed*7919;const rnd=()=>{a=(a*1664525+1013904223)>>>0;return a/4294967296};
+ let C=[X[Math.floor(rnd()*X.length)]];
+ while(C.length<k){const D=X.map(x=>Math.min(...C.map(c=>d2(x,c))));let t=rnd()*D.reduce((s,v)=>s+v,0),i=0;for(;i<D.length-1&&(t-=D[i])>0;i++);C.push(X[i])}
+ let l=[];for(let it=0;it<60;it++){const nl=X.map(x=>{let b=0,bd=1e9;C.forEach((c,j)=>{const v=d2(x,c);if(v<bd){bd=v;b=j}});return b});
+  const chg=nl.some((v,i)=>v!==l[i]);l=nl;C=C.map((c,j)=>{const m=X.filter((_,i)=>l[i]===j);return m.length?[0,1].map(q=>m.reduce((s,x)=>s+x[q],0)/m.length):c});if(!chg)break}
+ return{l,inertia:X.reduce((s,x,i)=>s+d2(x,C[l[i]]),0)}}
+const TN={2:['Low','High'],3:['Low','Medium','High'],4:['Low','Medium','Medium-High','High'],5:['Very Low','Low','Medium','High','Very High']},
+PAL=['#16a34a','#84cc16','#eab308','#f97316','#dc2626'],PI={2:[0,4],3:[0,2,4],4:[0,2,3,4],5:[0,1,2,3,4]};
+function cluster(st,k){
+ const P=[];st.grid.forEach((row,d)=>row.forEach((g,i)=>P.push({d,h:H0+i,avg:g.avg,max:g.max})));
+ const F=['avg','max'],mu=F.map(a=>P.reduce((s,p)=>s+p[a],0)/P.length),sd=F.map((a,j)=>Math.sqrt(P.reduce((s,p)=>s+(p[a]-mu[j])**2,0)/P.length)||1);
+ const X=P.map(p=>F.map((a,j)=>(p[a]-mu[j])/sd[j]));let best;
+ for(let s=1;s<=8;s++){const r=km(X,k,s);if(!best||r.inertia<best.inertia)best=r}
+ const cents=Array.from({length:k},(_,c)=>{const m=P.filter((_,i)=>best.l[i]===c),n=m.length||1;return{c,n:m.length,avg:m.reduce((s,p)=>s+p.avg,0)/n,max:m.reduce((s,p)=>s+p.max,0)/n}});
+ [...cents].sort((a,b)=>a.avg-b.avg).forEach((c,r)=>{c.rank=r;c.name=TN[k][r];c.color=PAL[PI[k][r]]}); // labels from centre values, not cluster ids
+ P.forEach((p,i)=>{const c=cents[best.l[i]];p.rank=c.rank;p.name=c.name;p.color=c.color});
+ return{slots:P,cents:cents.filter(c=>c.n).sort((a,b)=>a.rank-b.rank),inertia:best.inertia}}
+let cache={};function clusterAll(k){const key=db.records.length+'|'+k;if(!cache[key]){cache={};cache[key]=cluster(slotStats({dow:'all',m:'all'}),k)}return cache[key]}
+
+/* ---------- booking logic ---------- */
+const active=()=>db.machines.filter(m=>m.status!=='maintenance');
+const freeMachines=(d,h)=>{const bk=new Set(db.bookings.filter(b=>b.s==='confirmed'&&b.d===d&&b.h===h).map(b=>b.m));return active().filter(m=>!bk.has(m.id))};
+const PER={Morning:[6,11],Afternoon:[12,16],Evening:[17,22]};
+function recommend(d,per,mid){
+ const cl=clusterAll(3),now=new Date(),isT=d===iso(now),[a,b]=PER[per]||[6,22],N=db.machines.length||1;
+ return HRS.filter(h=>h>=a&&h<=b&&!db.blocked.includes(h)&&!(isT&&h<=now.getHours())).map(h=>{
+  const s=cl.slots.find(p=>p.d===dow(d)&&p.h===h),fr=freeMachines(d,h).filter(m=>mid==='any'||m.id===mid);
+  return{h,s,fr,pct:Math.min(100,s.avg/N*100)}}).sort((x,y)=>x.s.avg-y.s.avg||y.fr.length-x.fr.length)}
+function why(r,d){const s=r.s;return s.rank===0?`Usually only ${s.avg.toFixed(1)} of ${db.machines.length} machines run at ${fh(r.h)} on ${DAYS[dow(d)]}s – a quiet, low-usage slot.`:s.name==='High'?`Peak hour: about ${s.avg.toFixed(1)} machines run at once on ${DAYS[dow(d)]}s. Expect a queue.`:`Moderate demand (about ${s.avg.toFixed(1)} machines busy on ${DAYS[dow(d)]}s).`}
+function book(d,h,m){const u=me(),fr=freeMachines(d,h),id=m==='any'?fr[0]?.id:m;
+ if(!id||!fr.find(x=>x.id===id))return toast('That slot is no longer available');
+ if(db.bookings.some(b=>b.u===u.email&&b.s==='confirmed'&&b.d===d&&b.h===h))return toast('You already have a booking at this time');
+ db.bookings.push({id:Date.now(),u:u.email,d,h,m:id,s:'confirmed',c:iso(new Date())});save();toast(`Booked ${id} · ${d} ${fh(h)}`);route()}
+function cancel(id){const b=db.bookings.find(x=>x.id==id);if(b){b.s='cancelled';save();toast('Booking cancelled');route()}}
+const mname=id=>db.machines.find(m=>m.id===id)?.name||id;
+const bTable=(L,adm)=>L.length?`<div class=wrap><table><tr><th>Date<th>Time<th>Machine${adm?'<th>Resident':''}<th>Status<th></tr>${L.map(b=>`<tr><td>${b.d}<td>${fh(b.h)}<td>${mname(b.m)}${adm?`<td>${db.users.find(u=>u.email===b.u)?.name||b.u}`:''}<td><span class=pill style="background:${b.s==='confirmed'?'var(--g)':'var(--mut)'}">${b.s}</span><td>${b.s==='confirmed'?`<button class="sm del" onclick="cancel(${b.id})">Cancel</button>`:''}`).join('')}</table></div>`:'<p class=sub>No bookings yet.</p>';
+const myB=()=>{const u=me();return db.bookings.filter(b=>u.role==='admin'||b.u===u.email).sort((a,b)=>(b.d+pad(b.h)).localeCompare(a.d+pad(a.h)))};
+const heat=st=>{const mx=Math.max(...st.grid.flat().map(g=>g.avg))||1;return`<div class=wrap><div class=heat><div></div>${HRS.map(h=>`<div style="color:var(--mut)">${h}</div>`).join('')}${st.grid.map((r,d)=>`<div style="color:var(--mut);justify-content:flex-start">${DAYS[d]}</div>`+r.map((g,i)=>`<div title="${DAYS[d]} ${fh(H0+i)}: ${g.avg.toFixed(1)} cycles" style="background:hsl(${135-135*g.avg/mx},70%,45%)">${g.avg.toFixed(1)}</div>`).join('')).join('')}</div></div>`};
+
+/* ---------- shell & auth ---------- */
+const NAV=[['dashboard','Dashboard'],['analytics','Analytics'],['kmeans','K-Means'],['best','Find Best Time'],['bookings','My Bookings'],['admin','Admin']];
+function authView(reg){$('#app').innerHTML=`<div id=auth><div class=card><h1>🌙 QuietHours</h1><p class=sub>${reg?'Create your resident account':'Sign in to schedule smarter washes'}</p>
+<form onsubmit="return doAuth(event,${!!reg})">${reg?'<input id=an placeholder="Full name" required>':''}<input id=ae type=email placeholder="Email" required><input id=ap type=password placeholder="Password (min 6)" minlength=6 required><button>${reg?'Register':'Log in'}</button></form>
+<p class=sub style="margin:14px 0 0">${reg?'Have an account?':'New here?'} <a href=# onclick="authView(${!reg});return false">${reg?'Log in':'Register'}</a></p>
+${reg?'':'<p class=sub style="font-size:12px">Demo – resident: demo@smartlaundry.com / demo123 · admin: admin@smartlaundry.com / admin123</p>'}</div></div>`}
+function doAuth(e,reg){e.preventDefault();const em=$('#ae').value.trim().toLowerCase(),pw=hs($('#ap').value);
+ if(reg){if(db.users.some(u=>u.email===em)){toast('Email already registered');return false}db.users.push({name:$('#an').value.trim(),email:em,pw,role:'resident'});save()}
+ const u=db.users.find(x=>x.email===em&&x.pw===pw);if(!u){toast('Wrong email or password');return false}
+ store.set('sl_me',em);location.hash='dashboard';route();return false}
+function logout(){store.del('sl_me');route()}
+function route(){const u=me();if(!u)return authView();const p=(location.hash.slice(1)||'dashboard'),pg=PG[p]&&(p!=='admin'||u.role==='admin')?p:'dashboard';
+ Chart.defaults.color=getComputedStyle(document.body).getPropertyValue('--mut').trim()||'#5c7487';Chart.defaults.font.family="'Plus Jakarta Sans',sans-serif";
+ $('#app').innerHTML=`<header><span class=logo>🌙 QuietHours</span><nav>${NAV.filter(n=>n[0]!=='admin'||u.role==='admin').map(n=>`<a href="#${n[0]}" class="${n[0]===pg?'on':''}">${n[1]}</a>`).join('')}</nav><span class=who>${u.name} · ${u.role}<button class="sm sec" onclick=logout()>Log out</button></span></header><main id=page></main>`;PG[pg]()}
+addEventListener('hashchange',()=>me()&&route());
+
+/* ---------- pages ---------- */
+const PG={};
+PG.dashboard=()=>{const now=new Date(),td=iso(now),hr=now.getHours(),M=db.machines,cl=clusterAll(3);
+ const busy=new Set([...M.filter(m=>m.status==='occupied').map(m=>m.id),...db.bookings.filter(b=>b.s==='confirmed'&&b.d===td&&b.h===hr).map(b=>b.m)]);
+ const occ=active().filter(m=>busy.has(m.id)).length,cur=cl.slots.find(s=>s.d===now.getDay()&&s.h===hr),dates=new Set(db.records.map(r=>r.d)).size||1,
+ util=db.records.length/(dates*M.length*HRS.length)*100,cb=db.bookings.filter(b=>b.s==='confirmed');
+ const rec=recommend(td,'Morning','any').concat(recommend(td,'Afternoon','any'),recommend(td,'Evening','any')).sort((a,b)=>a.s.avg-b.s.avg).slice(0,3);
+ $('#page').innerHTML=`<h1>Hello, ${me().name.split(' ')[0]} 👋</h1><p class=sub>Live laundry overview for ${DAYS[now.getDay()]}, ${td}</p>
+<div class="grid g4"><div class="card stat"><b>${M.length}</b><span>Total machines</span></div><div class="card stat"><b>${occ}</b><span>Occupied now</span></div><div class="card stat"><b>${active().length-occ}</b><span>Available now</span></div>
+<div class="card stat"><b>${cb.length}</b><span>Confirmed bookings</span></div><div class="card stat"><b>${db.records.length}</b><span>Total wash cycles</span></div><div class="card stat"><b>${util.toFixed(0)}%</b><span>Avg utilisation</span></div>
+<div class="card stat"><b style="font-size:20px;padding-top:6px"><span class=pill style="background:${cur?cur.color:'var(--mut)'}">${cur?cur.name+' demand':'Closed'}</span></b><span>Current demand</span></div></div>
+<div class="card" style="margin-top:16px"><h2>Today’s demand by hour</h2><div class=strip>${HRS.map(h=>{const s=cl.slots.find(p=>p.d===now.getDay()&&p.h===h);return`<div title="${fh(h)} ${s.name}" style="background:${s.color};${h===hr?'outline:3px solid var(--blue)':''}">${h}</div>`}).join('')}</div><p class=sub style="margin:10px 0 0;font-size:12px">🟩 Low · 🟨 Medium · 🟥 High (from K-Means clusters). Outlined = now.</p></div>
+<div class="grid g2" style="margin-top:16px"><div class=card><h2>Recommended times today</h2>${rec.length?rec.map(r=>`<div class=rec style="padding:6px 0"><span><b>${fh(r.h)}</b> <span class=pill style="background:${r.s.color}">${r.s.name}</span></span><small>${r.fr.length} machines free</small></div>`).join(''):'<p class=sub>No more slots today – try tomorrow.</p>'}<a class=btn href="#best" style="display:inline-block;text-decoration:none;margin-top:8px">Find best time</a></div>
+<div class=card><h2>${me().role==='admin'?'Recent bookings':'Your bookings'}</h2>${bTable(myB().slice(0,5),me().role==='admin')}</div></div>`};
+
+PG.analytics=()=>{const t=new Date(),f=new Date();f.setDate(t.getDate()-28);
+ $('#page').innerHTML=`<h1>Usage Analytics</h1><p class=sub>Explore when machines are used. Filter by date, day and machine.</p>
+<div class=bar><label>From<input type=date id=f1 value="${iso(f)}"></label><label>To<input type=date id=f2 value="${iso(t)}"></label><label>Day<select id=f3><option value=all>All days${DAYS.map((d,i)=>`<option value=${i}>${d}`).join('')}</select></label><label>Machine<select id=f4><option value=all>All machines${db.machines.map(m=>`<option value=${m.id}>${m.name}`).join('')}</select></label></div>
+<div class="grid g2"><div class=card><h2>Machine usage by hour (avg cycles/day)</h2><div class=cv><canvas id=c1></canvas></div></div><div class=card><h2>Daily usage comparison</h2><div class=cv><canvas id=c2></canvas></div></div>
+<div class=card><h2>Weekday vs weekend</h2><div class=cv><canvas id=c3></canvas></div></div><div class=card><h2>Machine-wise utilisation (%)</h2><div class=cv><canvas id=c4></canvas></div></div>
+<div class=card><h2>🔥 Peak-hour analysis</h2><div id=pk></div></div><div class=card><h2>🌿 Low-demand time slots</h2><div id=lw></div></div>
+<div class=card><h2>Booking trends</h2><div class=cv><canvas id=c5></canvas></div></div><div class=card><h2>Heatmap · day × hour</h2><div id=hm></div></div></div>`;
+ ['f1','f2','f3','f4'].forEach(i=>$('#'+i).onchange=drawA);drawA()};
+function drawA(){const st=slotStats({from:$('#f1').value,to:$('#f2').value,dow:$('#f3').value,m:$('#f4').value}),nd=st.dates.length||1,H=HRS.map(h=>st.recs.filter(r=>r.h===h).length/nd);
+ ch('c1',{type:'bar',data:{labels:HRS.map(fh),datasets:[{data:H,backgroundColor:H.map(v=>v>3.5?'#dc2626':v>2?'#eab308':'#16a34a'),borderRadius:6}]},options:{plugins:{legend:{display:false}}}});
+ const dc={};st.recs.forEach(r=>dc[r.d]=(dc[r.d]||0)+1);
+ ch('c2',{type:'line',data:{labels:st.dates,datasets:[{data:st.dates.map(d=>dc[d]||0),borderColor:'#1d6fd8',backgroundColor:'rgba(29,111,216,.15)',fill:true,tension:.35}]},options:{plugins:{legend:{display:false}}}});
+ const we=st.recs.filter(r=>[0,6].includes(dow(r.d))).length;
+ ch('c3',{type:'doughnut',data:{labels:['Weekday','Weekend'],datasets:[{data:[st.recs.length-we,we],backgroundColor:['#1d6fd8','#0fb5a8']}]}});
+ ch('c4',{type:'bar',data:{labels:db.machines.map(m=>m.name),datasets:[{data:db.machines.map(m=>+(st.recs.filter(r=>r.m===m.id).length/(nd*HRS.length)*100).toFixed(1)),backgroundColor:'#0fb5a8',borderRadius:6}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}});
+ const bc={};db.bookings.forEach(b=>bc[b.d]=(bc[b.d]||0)+1);const bd=Object.keys(bc).sort();
+ ch('c5',{type:'line',data:{labels:bd,datasets:[{label:'Bookings',data:bd.map(d=>bc[d]),borderColor:'#0fb5a8',tension:.3}]},options:{plugins:{legend:{display:false}}}});
+ const o=HRS.map((h,i)=>({h,v:H[i]})).sort((a,b)=>b.v-a.v),ch5=(L,c)=>L.map(x=>`<span class=chip style="border-left:4px solid ${c}">${fh(x.h)} · ${x.v.toFixed(1)}</span>`).join('');
+ $('#pk').innerHTML=ch5(o.slice(0,5),'#dc2626')+'<p class=sub>Busiest hours – avoid these for short waits.</p>';$('#lw').innerHTML=ch5(o.slice(-5).reverse(),'#16a34a')+'<p class=sub>Quietest hours – best chance of a free machine.</p>';$('#hm').innerHTML=heat(st)}
+
+let KK=3,KM='all';
+PG.kmeans=()=>{const st=slotStats({dow:'all',m:KM}),r=cluster(st,KK),tot=st.recs.length;
+ $('#page').innerHTML=`<h1>K-Means Clustering</h1><p class=sub>Every weekly time slot (day + hour) is grouped by how busy it usually is.</p>
+<div class=bar><label>Clusters (k)<select id=kk>${[2,3,4,5].map(k=>`<option ${k===KK?'selected':''}>${k}`).join('')}</select></label><label>Machine<select id=km><option value=all>All machines${db.machines.map(m=>`<option value=${m.id} ${m.id===KM?'selected':''}>${m.name}`).join('')}</select></label></div>
+<div class="grid g4">${r.cents.map(c=>`<div class="card stat" style="border-top:5px solid ${c.color}"><span class=pill style="background:${c.color}">${c.name} usage</span><b>${c.avg.toFixed(2)}</b><span>centroid · avg machines busy<br>peak-day centroid: ${c.max.toFixed(2)} · ${c.n} slots</span></div>`).join('')}</div>
+<div class=card style="margin-top:16px"><h2>Cluster scatter plot</h2><div class=cv style="height:340px"><canvas id=sc></canvas></div></div>
+<div class="card" style="margin-top:16px"><h2>In simple words</h2><p>${tot} wash cycles were analysed across ${st.dates.length} days. For each of the ${r.slots.length} weekly slots we measured the average and the highest number of machines running, scaled both to the same range (z-score) and ran K-Means (k-means++ start, best of 8 runs).</p>
+<p>Cluster numbers are random, so names were assigned by comparing centroids: the lowest centre is <b>${r.cents[0].name}</b> (about ${r.cents[0].avg.toFixed(1)} machines busy) and the highest is <b>${r.cents.at(-1).name}</b> (about ${r.cents.at(-1).avg.toFixed(1)}). Washing in a green slot means short or no waiting; red slots are best avoided. Results are recalculated automatically whenever usage data changes.</p></div>
+<div class="grid g2" style="margin-top:16px">${r.cents.map(c=>`<div class=card style="border-left:6px solid ${c.color}"><h2>${c.name} usage slots (${c.n})</h2>${DAYS.map((d,i)=>{const hh=r.slots.filter(s=>s.d===i&&s.rank===c.rank).map(s=>s.h);return hh.length?`<div><b>${d}</b> ${hh.map(h=>`<span class=chip>${fh(h)}</span>`).join('')}</div>`:''}).join('')}</div>`).join('')}</div>`;
+ $('#kk').onchange=e=>{KK=+e.target.value;PG.kmeans()};$('#km').onchange=e=>{KM=e.target.value;PG.kmeans()};
+ ch('sc',{type:'scatter',data:{datasets:r.cents.map(c=>({label:c.name+' usage',data:r.slots.filter(s=>s.rank===c.rank).map(s=>({x:s.h+(s.d-3)*.09,y:s.avg,d:s.d})),backgroundColor:c.color,pointRadius:5})).concat([{label:'Centroids',data:r.cents.map(c=>({x:null,y:c.avg})),pointStyle:'crossRot',pointRadius:0}].slice(0,0))},
+ options:{scales:{x:{title:{display:true,text:'Hour of day'},min:5,max:23},y:{title:{display:true,text:'Avg machines busy'}}},plugins:{tooltip:{callbacks:{label:c=>`${DAYS[c.raw.d]} ${fh(Math.round(c.raw.x))} · ${c.raw.y.toFixed(2)} busy`}},annotation:{}}}});
+ const c0=charts.sc;r.cents.forEach(c=>c0.data.datasets.push({label:c.name+' centroid',type:'line',data:[{x:5,y:c.avg},{x:23,y:c.avg}],borderColor:c.color,borderDash:[6,5],pointRadius:0,borderWidth:1.5}));c0.update()};
+
+let BS={d:iso(new Date(Date.now()+864e5)),p:'Evening',m:'any'};
+PG.best=()=>{$('#page').innerHTML=`<h1>Find Best Time to Wash</h1><p class=sub>Recommendations from historical usage and today’s confirmed bookings.</p>
+<div class=bar><label>Date<input type=date id=bd min="${iso(new Date())}" value="${BS.d}"></label><label>Period<select id=bp>${Object.keys(PER).map(p=>`<option ${p===BS.p?'selected':''}>${p}`).join('')}</select></label><label>Machine<select id=bm><option value=any>Any available machine${db.machines.map(m=>`<option value=${m.id} ${m.id===BS.m?'selected':''}>${m.name}`).join('')}</select></label><button onclick=findBest()>Find best time</button></div><div id=res></div>`;
+ ['bd','bp','bm'].forEach(i=>$('#'+i).onchange=findBest);findBest()};
+function findBest(){BS={d:$('#bd').value,p:$('#bp').value,m:$('#bm').value};if(!BS.d)return;const r=recommend(BS.d,BS.p,BS.m),cl=clusterAll(3),avoid=cl.slots.filter(s=>s.d===dow(BS.d)&&s.rank===cl.cents.length-1);
+ $('#res').innerHTML=(r.length?r.map((x,i)=>`<div class=card style="margin-bottom:12px;border-left:6px solid ${x.s.color}"><div class=rec><div><h2 style="margin:0">${i===0?'⭐ ':''}${fh(x.h)} – ${fh(x.h+1)} <span class=pill style="background:${x.s.color}">${x.s.name}</span></h2><p class=sub style="margin:4px 0 0">${why(x,BS.d)}</p></div>
+<div style="min-width:170px"><small>Expected demand ${x.pct.toFixed(0)}% · ${x.fr.length} machine${x.fr.length===1?'':'s'} free</small><div class=meter><i style="width:${x.pct}%;background:${x.s.color}"></i></div>${x.fr.length?`<button onclick="book('${BS.d}',${x.h},'${BS.m}')">Book slot</button>`:'<button class=sec disabled>Fully booked</button>'}</div></div></div>`).join(''):'<div class=card>No open slots for this selection.</div>')+
+ `<div class=card><h2>🚫 Peak hours to avoid on ${DAYS[dow(BS.d)]}s</h2>${avoid.map(s=>`<span class=chip style="border-left:4px solid var(--r)">${fh(s.h)}</span>`).join('')||'None'}</div>`}
+
+PG.bookings=()=>{$('#page').innerHTML=`<h1>My Bookings</h1><p class=sub>History, upcoming slots and cancellations.</p><div class=card>${bTable(myB().filter(b=>b.u===me().email))}</div>`};
+
+PG.admin=()=>{$('#page').innerHTML=`<h1>Administration</h1><p class=sub>Manage machines, time slots, usage records and bookings.</p><div class="grid g2">
+<div class=card><h2>Machines</h2><div class=wrap><table>${db.machines.map(m=>`<tr><td>${m.name}<td><select onchange="setSt('${m.id}',this.value)">${['available','occupied','maintenance'].map(s=>`<option ${s===m.status?'selected':''}>${s}`).join('')}</select><td><button class="sm del" onclick="rmM('${m.id}')">Remove</button>`).join('')}</table></div><button class=sm style="margin-top:10px" onclick=addM()>+ Add machine</button></div>
+<div class=card><h2>Bookable time slots</h2><p class=sub>Tap an hour to block or open it.</p>${HRS.map(h=>`<button class="sm ${db.blocked.includes(h)?'del':'sec'}" style="margin:2px" onclick="tgl(${h})">${fh(h)}</button>`).join('')}</div>
+<div class=card><h2>Add usage record</h2><div class=bar><label>Date<input type=date id=ud value="${iso(new Date())}"></label><label>Hour<select id=uh>${HRS.map(h=>`<option value=${h}>${fh(h)}`).join('')}</select></label><label>Machine<select id=um>${db.machines.map(m=>`<option value=${m.id}>${m.name}`).join('')}</select></label><button onclick=addR()>Add</button></div>
+<label>Upload CSV (date,hour,machine)<input type=file id=uf accept=".csv" onchange=upl(this)></label><p class=sub>${db.records.length} records · clusters recalculate automatically.</p><button class="sm sec" onclick="if(confirm('Reset all demo data?')){seed();location.hash='dashboard';route()}">Reset demo data</button></div>
+<div class=card style="grid-column:1/-1"><h2>All bookings</h2>${bTable(myB(),true)}</div></div>`};
+const setSt=(id,s)=>{db.machines.find(m=>m.id===id).status=s;save();toast('Status updated')},
+rmM=id=>{db.machines=db.machines.filter(m=>m.id!==id);save();PG.admin()},
+addM=()=>{const n=Math.max(0,...db.machines.map(m=>+m.id.slice(1)))+1;db.machines.push({id:'M'+n,name:'Machine '+n,status:'available'});save();PG.admin()},
+tgl=h=>{db.blocked=db.blocked.includes(h)?db.blocked.filter(x=>x!==h):[...db.blocked,h];save();PG.admin()},
+addR=()=>{db.records.push({d:$('#ud').value,h:+$('#uh').value,m:$('#um').value});save();toast('Record added – clusters updated');PG.admin()};
+function upl(i){const f=i.files[0];if(!f)return;f.text().then(t=>{let n=0;t.split(/\r?\n/).forEach(l=>{const[d,h,m]=l.split(',').map(s=>s.trim());const mm=db.machines.find(x=>x.id===m||x.name===m);if(/^\d{4}-\d\d-\d\d$/.test(d)&&+h>=6&&+h<=22&&mm){db.records.push({d,h:+h,m:mm.id});n++}});save();toast(n+' records imported – clusters updated');PG.admin()})}
+route();
+</script></body></html>
